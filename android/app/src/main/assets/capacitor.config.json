@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.starter",
+	"appName": "Admin",
+	"webDir": "build",
+	"bundledWebRuntime": false
+}
