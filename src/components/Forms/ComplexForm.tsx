@@ -12,33 +12,58 @@ import {
   IonLabel,
   IonLoading,
   IonRow,
+  useIonViewDidEnter,
 } from "@ionic/react";
 import { trash } from "ionicons/icons";
 import React, { useState } from "react";
 import { useHistory } from "react-router";
 import Connection from "../../mixins/Connection";
+import { validCellNum, validName, validPostalCode } from "../Regex/Regex";
 
 const ComplexForm: React.FC<{
   name: string;
   isDisabled: boolean;
-  content: any;
+  id: string;
 }> = (props) => {
+  useIonViewDidEnter(() => {
+    if (props.name === "Update") {
+      setShowLoader(true);
+      getComplex();
+    }
+  });
 
-  var {
-    complexId,
-    complexName,
-    street1,
-    street2,
-    city,
-    province,
-    postalCode,
-    telephoneNum,
-    startTime,
-    endTime,
-    cellNum,
-    agents,
-    units,
-  } = props.content;
+  const [complex, setComplex] = useState({
+    complexId: "",
+    complexName: "",
+    street1: "",
+    street2: "",
+    city: "",
+    province: "",
+    postalCode: "",
+    telephoneNum: "",
+    startTime: "",
+    endTime: "",
+    cellNum: "",
+    units: ["Default"],
+    agents: [],
+  });
+
+  const getComplex = () => {
+    var url = "complex/get/".concat(props.id);
+    Connection.processGetRequest({}, url, (response: any) => {
+      mapComplex(response);
+    });
+  };
+
+  const mapComplex = (response: any) => {
+    if (response.type === "error") {
+      setErrorMessage(response.data);
+      setShowError(true);
+    } else {
+      setShowLoader(false);
+      setComplex(response.data.data);
+    }
+  };
 
   const [showLoader, setShowLoader] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -46,133 +71,167 @@ const ComplexForm: React.FC<{
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const [enteredComplexName, setEnteredComplexName] = useState(complexName);
-  const [enteredStreet1, setEnteredStreet1] = useState(street1);
-  const [enteredStreet2, setEnteredStreet2] = useState(street2);
-  const [enteredCity, setEnteredCity] = useState(city);
-  const [enteredProvince, setEnteredProvince] = useState(province);
-  const [enteredPostalCode, setEnteredPostalCode] = useState(postalCode);
-  const [enteredTelNum, setEnteredTelNum] = useState(telephoneNum);
-  const [enteredStartTime, setEnteredStartTime] = useState(startTime.toString());
-  const [enteredEndTime, setEnteredEndTime] = useState(endTime.toString());
-  const [enteredCellNum, setEnteredCellNum] = useState(cellNum);
-
-  const updateComplexName = (complexName: any) => {setEnteredComplexName(complexName)};
-  const updateStreet1= (street1: any) => {setEnteredStreet1(street1)};
-  const updateStreet2 = (street2: any) => {setEnteredStreet2(street2)};
-  const updateCity = (city: any) => {setEnteredCity(city)};
-  const updateProvince = (province: any) => {setEnteredProvince(province)};
-  const updatePostalCode = (postalCode: any) => {setEnteredPostalCode(postalCode)};
-  const updateTelNum = (telephoneNum: any) => {setEnteredTelNum(telephoneNum)};
-  const updateStartTime = (startTime: any) => {setEnteredStartTime(startTime); console.log(startTime)};
-  const updateEndTime = (endTime: any) => {setEnteredEndTime(endTime)};
-  const updateCellNum = (cellNum: any) => {setEnteredCellNum(cellNum)};
+  const updateComplexName = (complexName: any) =>
+    (complex.complexName = complexName);
+  const updateStreet1 = (street1: any) => (complex.street1 = street1);
+  const updateStreet2 = (street2: any) => (complex.street2 = street2);
+  const updateCity = (city: any) => (complex.city = city);
+  const updateProvince = (province: any) => (complex.province = province);
+  const updatePostalCode = (postalCode: any) =>
+    (complex.postalCode = postalCode);
+  const updateTelNum = (telephoneNum: any) =>
+    (complex.telephoneNum = telephoneNum);
+  const updateStartTime = (startTime: any) => (complex.startTime = startTime);
+  const updateEndTime = (endTime: any) => (complex.endTime = endTime);
+  const updateCellNum = (cellNum: any) => (complex.cellNum = cellNum);
 
   var num = 0;
 
   const path = useHistory();
 
-  const [unitList, setUnitList] = useState<string[]>(units);
-  
+  const [unitList, setUnitList] = useState<string[]>(complex.units);
+
   const addUnit = (e: any) => {
-    if (e.key === "Enter" && e.target.value !== '') {
-      unitList.push(e.target.value);
+    if (e.key === "Enter" && e.target.value !== "") {
+      complex.units.push(e.target.value);
       num = num + 1;
       setUnitList(unitList);
-      console.log(unitList);
-      console.log(unitList.indexOf(e.target.value))
-      e.target.value = '';
+      console.log(complex.units);
+      console.log(complex.units.indexOf(e.target.value));
+      e.target.value = "";
     }
   };
 
   const removeUnit = (unit: any) => {
-    let temp:any = [];
-      for(let i = 0; i < unitList.length; i++){
-          if(unitList[i] !== unit){
-              temp.push(unitList[i]);
-          }
+    let temp: any = [];
+    for (let i = 0; i < complex.units.length; i++) {
+      if (complex.units[i] !== unit) {
+        temp.push(complex.units[i]);
       }
-      setUnitList(temp);
-      console.log(temp);
+    }
+    complex.units = temp;
+    setUnitList(temp);
+    console.log(temp);
   };
-  
+
   const submitHandler = () => {
     setShowLoader(true);
-    if(props.name === "Update"){
-      let url = "complex/update"
-       const payload = {
-         complexId: complexId,
-         complexName: enteredComplexName,
-         street1: enteredStreet1,
-         street2: enteredStreet2,
-         city: enteredCity,
-         province: enteredProvince,
-         postalCode: enteredPostalCode,
-         telephoneNum: enteredTelNum,
-         startTime: enteredStartTime,
-         endTime: enteredEndTime,
-         units: unitList,
-         agents: agents
-       }
-       Connection.processPostRequest(payload, url, (response: any) =>{
-         mapUpdateResponse(response);
-       })
+    if (props.name === "Update") {
+      validateForm();
+    } else if (props.name === "Delete") {
+      let url = "complex/remove/".concat(complex.complexId);
 
-    }
-    else if(props.name === "Delete"){
-      let url = "complex/remove/".concat(complexId);
-
-      Connection.processDeleteRequest({}, url, (response: any) =>{
+      Connection.processDeleteRequest({}, url, (response: any) => {
         mapDeleteResponse(response);
-      })
-
-    }else if(props.name === "Add"){
-       let url = "complex/add"
-       const payload = {
-         complexId: complexId,
-         complexName: enteredComplexName,
-         street1: enteredStreet1,
-         street2: enteredStreet2,
-         city: enteredCity,
-         province: enteredProvince,
-         postalCode: enteredPostalCode,
-         telephoneNum: enteredTelNum,
-         startTime: enteredStartTime,
-         endTime: enteredEndTime,
-         units: unitList,
-         agents: agents
-       }
-       Connection.processPostRequest(payload, url, (response: any) =>{
-         mapAddResponse(response);
-       })
+      });
+    } else if (props.name === "Add") {
+      validateForm();
     }
   };
 
-  const mapAddResponse = (response: any) =>{
-    if (response.type === "error") {
-      setErrorMessage(response.data);
+  const validateForm = () => {
+    if (
+      complex.complexName === "" ||
+      complex.street2 === "" ||
+      complex.city === "" ||
+      complex.province === "" ||
+      complex.postalCode === "" ||
+      complex.telephoneNum === "" ||
+      complex.startTime === "" ||
+      complex.endTime === "" ||
+      complex.units === []
+    ) {
       setShowLoader(false);
+      setErrorMessage("Fields must not be left empty.");
       setShowError(true);
-      console.log("error!");
-    } else {
+    } else if (!validName.test(complex.complexName)) {
       setShowLoader(false);
-      setSuccessMessage("Complex Added!")
-      setShowSuccess(true);
-    }
-  }
-  const mapUpdateResponse = (response: any) =>{
-    if (response.type === "error") {
-      setErrorMessage(response.data);
+      setErrorMessage("Invalid Complex Name.");
+      setShowError(true);
+    } else if (!validName.test(complex.city)) {
       setShowLoader(false);
+      setErrorMessage("Invalid City.");
+      setShowError(true);
+    } else if (!validName.test(complex.province)) {
+      setShowLoader(false);
+      setErrorMessage("Invalid Province.");
+      setShowError(true);
+    } else if (!validPostalCode.test(complex.postalCode)) {
+      setShowLoader(false);
+      setErrorMessage("Invalid Postal Code.");
+      setShowError(true);
+    } else if (!validCellNum.test(complex.telephoneNum)) {
+      setShowLoader(false);
+      setErrorMessage("Invalid Telephone Number.");
       setShowError(true);
     } else {
-      setShowLoader(false);
-      setSuccessMessage("Complex Updated!")
-      setShowSuccess(true);
+      if (props.name === "Add") {
+        let url = "complex/add";
+        const payload = {
+          complexId: complex.complexId,
+          complexName: complex.complexName,
+          street1: complex.street1,
+          street2: complex.street2,
+          city: complex.city,
+          province: complex.province,
+          postalCode: complex.postalCode,
+          telephoneNum: complex.telephoneNum,
+          startTime: complex.startTime,
+          endTime: complex.endTime,
+          units: complex.units,
+          agents: complex.agents,
+        };
+        Connection.processPostRequest(payload, url, (response: any) => {
+          mapAddResponse(response);
+        });
+      } else {
+        let url = "complex/update";
+        const payload = {
+          complexId: complex.complexId,
+          complexName: complex.complexName,
+          street1: complex.street1,
+          street2: complex.street2,
+          city: complex.city,
+          province: complex.province,
+          postalCode: complex.postalCode,
+          telephoneNum: complex.telephoneNum,
+          startTime: complex.startTime,
+          endTime: complex.endTime,
+          units: complex.units,
+          agents: complex.agents,
+        };
+        Connection.processPostRequest(payload, url, (response: any) => {
+          mapUpdateResponse(response);
+        });
+      }
     }
-  }
+  };
 
-  const mapDeleteResponse = (response: any) =>{
+  const mapAddResponse = (response: any) => {
+    if (response.type === "error") {
+      setErrorMessage(response.data);
+      setShowLoader(false);
+      setShowError(true);
+      console.log("error!");
+    } else {
+      setShowLoader(false);
+      setSuccessMessage("Complex Added!");
+      setShowSuccess(true);
+    }
+  };
+  const mapUpdateResponse = (response: any) => {
+    if (response.type === "error") {
+      setErrorMessage(response.data);
+      setShowLoader(false);
+      setShowError(true);
+    } else {
+      setShowLoader(false);
+      setSuccessMessage("Complex Updated!");
+      setShowSuccess(true);
+    }
+  };
+
+  const mapDeleteResponse = (response: any) => {
     if (response.type === "error") {
       setShowLoader(false);
       setErrorMessage(response.data);
@@ -180,10 +239,10 @@ const ComplexForm: React.FC<{
       console.log("error!");
     } else {
       setShowLoader(false);
-      setSuccessMessage("Complex Deleted!")
+      setSuccessMessage("Complex Deleted!");
       setShowSuccess(true);
     }
-  }
+  };
 
   return (
     <IonGrid>
@@ -214,7 +273,11 @@ const ComplexForm: React.FC<{
         <IonCol>
           <IonItem>
             <IonLabel position="floating">Complex Name</IonLabel>
-            <IonInput value={enteredComplexName} disabled={props.isDisabled} onIonChange={e => updateComplexName(e.detail.value)}/>
+            <IonInput
+              value={complex.complexName}
+              disabled={props.isDisabled}
+              onIonChange={(e) => updateComplexName(e.detail.value)}
+            />
           </IonItem>
         </IonCol>
       </IonRow>
@@ -222,7 +285,11 @@ const ComplexForm: React.FC<{
         <IonCol>
           <IonItem>
             <IonLabel position="floating">Street 1</IonLabel>
-            <IonInput value={enteredStreet1} disabled={props.isDisabled} onIonChange={e => updateStreet1(e.detail.value)}/>
+            <IonInput
+              value={complex.street1}
+              disabled={props.isDisabled}
+              onIonChange={(e) => updateStreet1(e.detail.value)}
+            />
           </IonItem>
         </IonCol>
       </IonRow>
@@ -230,7 +297,11 @@ const ComplexForm: React.FC<{
         <IonCol>
           <IonItem>
             <IonLabel position="floating">Street 2</IonLabel>
-            <IonInput value={enteredStreet2} disabled={props.isDisabled} onIonChange={e => updateStreet2(e.detail.value)}/>
+            <IonInput
+              value={complex.street2}
+              disabled={props.isDisabled}
+              onIonChange={(e) => updateStreet2(e.detail.value)}
+            />
           </IonItem>
         </IonCol>
       </IonRow>
@@ -238,7 +309,11 @@ const ComplexForm: React.FC<{
         <IonCol>
           <IonItem>
             <IonLabel position="floating">City</IonLabel>
-            <IonInput value={enteredCity} disabled={props.isDisabled} onIonChange={e => updateCity(e.detail.value)}/>
+            <IonInput
+              value={complex.city}
+              disabled={props.isDisabled}
+              onIonChange={(e) => updateCity(e.detail.value)}
+            />
           </IonItem>
         </IonCol>
       </IonRow>
@@ -246,13 +321,21 @@ const ComplexForm: React.FC<{
         <IonCol>
           <IonItem>
             <IonLabel position="floating">Province</IonLabel>
-            <IonInput value={enteredProvince} disabled={props.isDisabled} onIonChange={e => updateProvince(e.detail.value)}/>
+            <IonInput
+              value={complex.province}
+              disabled={props.isDisabled}
+              onIonChange={(e) => updateProvince(e.detail.value)}
+            />
           </IonItem>
         </IonCol>
         <IonCol>
           <IonItem>
             <IonLabel position="floating">Postal code</IonLabel>
-            <IonInput value={enteredPostalCode} disabled={props.isDisabled} onIonChange={e => updatePostalCode(e.detail.value)}/>
+            <IonInput
+              value={complex.postalCode}
+              disabled={props.isDisabled}
+              onIonChange={(e) => updatePostalCode(e.detail.value)}
+            />
           </IonItem>
         </IonCol>
       </IonRow>
@@ -260,21 +343,35 @@ const ComplexForm: React.FC<{
         <IonCol>
           <IonItem>
             <IonLabel position="floating">Telephone Number</IonLabel>
-            <IonInput value={enteredTelNum} disabled={props.isDisabled} onIonChange={e => updateTelNum(e.detail.value)}/>
+            <IonInput
+              value={complex.telephoneNum}
+              disabled={props.isDisabled}
+              onIonChange={(e) => updateTelNum(e.detail.value)}
+            />
           </IonItem>
         </IonCol>
       </IonRow>
       <IonRow>
         <IonCol>
           <IonItem>
-            <IonLabel>Operational Start Time</IonLabel>
-            <IonDatetime displayFormat="HH:mm" value={enteredStartTime} disabled={props.isDisabled} onIonChange={e => updateStartTime(e.detail.value)}/>
+            <IonLabel>Operational Start Time (hours)</IonLabel>
+            <IonDatetime
+              displayFormat="HH"
+              value={complex.startTime}
+              disabled={props.isDisabled}
+              onIonChange={(e) => updateStartTime(e.detail.value)}
+            />
           </IonItem>
         </IonCol>
         <IonCol>
           <IonItem>
-            <IonLabel>Operational End Time</IonLabel>
-            <IonDatetime displayFormat="HH:mm" value={enteredEndTime} disabled={props.isDisabled} onIonChange={e => updateEndTime(e.detail.value)}/>
+            <IonLabel>Operational End Time (hours)</IonLabel>
+            <IonDatetime
+              displayFormat="HH"
+              value={complex.endTime}
+              disabled={props.isDisabled}
+              onIonChange={(e) => updateEndTime(e.detail.value)}
+            />
           </IonItem>
         </IonCol>
       </IonRow>
@@ -282,7 +379,11 @@ const ComplexForm: React.FC<{
         <IonCol>
           <IonItem>
             <IonLabel position="floating">Cell Number</IonLabel>
-            <IonInput value={enteredCellNum} disabled={props.isDisabled} onIonChange={e => updateCellNum(e.detail.value)}/>
+            <IonInput
+              value={complex.cellNum}
+              disabled={props.isDisabled}
+              onIonChange={(e) => updateCellNum(e.detail.value)}
+            />
           </IonItem>
         </IonCol>
       </IonRow>
@@ -291,20 +392,25 @@ const ComplexForm: React.FC<{
           <IonItemDivider>
             <IonLabel>Units</IonLabel>
           </IonItemDivider>
-          {unitList.map((unit, index) => (
-            <IonChip key = {index}>
+          {complex.units.map((unit, index) => (
+            <IonChip key={index}>
               <IonLabel>{unit}</IonLabel>
-              <IonIcon icon={trash} onClick={ e => removeUnit(unit)}/>
+              <IonIcon icon={trash} onClick={(e) => removeUnit(unit)} />
             </IonChip>
           ))}
           <IonItem>
-            <IonInput onKeyUp={(e) => addUnit(e)} disabled={props.isDisabled}/>
+            <IonInput onKeyUp={(e) => addUnit(e)} disabled={props.isDisabled} />
           </IonItem>
         </IonCol>
       </IonRow>
       <IonRow>
         <IonCol>
-          <IonButton type="submit" expand="block" onClick={submitHandler}>
+          <IonButton
+            shape="round"
+            type="submit"
+            expand="block"
+            onClick={() => submitHandler()}
+          >
             {props.name}
           </IonButton>
         </IonCol>

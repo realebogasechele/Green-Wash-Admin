@@ -1,3 +1,4 @@
+/** @jsxImportSource theme-ui */
 import {
   IonAlert,
   IonButtons,
@@ -11,8 +12,6 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
-  useIonViewDidEnter,
-  useIonViewDidLeave,
   useIonViewWillEnter,
 } from "@ionic/react";
 import { add } from "ionicons/icons";
@@ -23,10 +22,7 @@ import Connection from "../../mixins/Connection";
 import "./Page.css";
 
 const Management: React.FC = () => {
-  let cards;
-
   const addUrl = "/add/";
-
   const { name, title } =
     useParams<{
       name: string;
@@ -94,10 +90,15 @@ const Management: React.FC = () => {
   ]);
 
   useIonViewWillEnter( () => {
+    if(title === 'agent'){
       getAgents();
+    }else if(title === 'complex'){
       getComplexes();
+    }else if(title === 'package'){
       getPackages();
+    }else{
       getPromotions();
+    }
   });
 
   const getAgents = () => {
@@ -198,7 +199,6 @@ const Management: React.FC = () => {
             isOpen={showLoader}
             message={'Please wait...'}
           />
-        {/* {cards} */}
         { title === "agent" && agents.length !== 0 &&
         agents.map((agent) => (
           <Card
@@ -211,9 +211,9 @@ const Management: React.FC = () => {
           />
         ))}
       { title === "agent" && agents.length === 0 && 
-        <h2>No Agents</h2>
+        <h2 sx={styles.heading}>No Agents</h2>
       }
-      { title === "complex" && complexes.length !== 0 &&
+      { title === "complex" && complexes[0].complexId !== '' &&
         complexes.map((complex) => (
           <Card
             type={title}
@@ -224,10 +224,10 @@ const Management: React.FC = () => {
             reference={name}
           />
         ))}
-      { title === "complex" && complexes.length === 0 &&
-        <h2>No Complexes</h2>
+      { title === "complex" && complexes[0].complexId === '' &&
+        <h2 sx={styles.heading}>No Complexes</h2>
       }
-      { title === "package" && packages.length !== 0 &&
+      { title === "package" && packages[0].minutes !== 0 &&
       packages.map((pack) => (
         <Card
           type={title}
@@ -238,10 +238,10 @@ const Management: React.FC = () => {
           reference={name}
         />
       ))}
-      { title === "package" && packages.length === 0 &&
-        <h2>No Packages</h2>
+      { title === "package" && packages[0].minutes === 0 &&
+        <h2 sx={styles.heading}>No Packages</h2>
       }
-      { title === "promotion" && promotions.length !== 0 &&
+      { title === "promotion" && promotions.length !== 0  &&
         promotions.map((promotion) => (
           <Card
             type={title}
@@ -253,7 +253,7 @@ const Management: React.FC = () => {
           />
         ))}
       { title === "promotion" && promotions.length === 0 &&
-        <h2>No Promotions</h2>
+        <h2 sx={styles.heading}>No Promotions</h2>
       }
         <IonFab vertical="bottom" horizontal="end" slot="fixed">
           <IonFabButton href={addUrl.concat(name, "/", title)}>
@@ -266,3 +266,13 @@ const Management: React.FC = () => {
 };
 
 export default Management;
+
+const styles = {
+  heading: {
+    display: "flex",
+    justifyContent: "center",
+    color: "grey",
+    mt:'40vh',
+    opacity: '0.5'
+  }
+}

@@ -140,7 +140,7 @@ const AddAgent: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <MultiForm buttonName="Add" type={title} isDisabled={false} content={content}/>
+        <MultiForm buttonName="Add" type={title} isDisabled={false} id={""}/>
       </IonContent>
     </IonPage>
   );

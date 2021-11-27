@@ -15,7 +15,6 @@ import MultiForm from "../../components/MultiForm/MultiForm";
 import InputControls from "../../components/InputControls/InputControls";
 import Connection from "../../mixins/Connection";
 
-var result : Agent| Complex | Pack | Promotion;
 interface Pack {
   packageId: string;
   promotionId: string;
@@ -68,19 +67,8 @@ interface Agent {
 
 const CardDetails: React.FC = () => {
 
-  useIonViewDidEnter(()=>{
-    if(type==="agent"){
-      getAgent();
-    }else if(type==="complex"){
-      getComplex();
-    }else if(type==="package"){
-      getPackage();
-    }else{
-      getPromotion();
-    }
-  })
   const [selectedSegment, setSelectedSegment] = useState<"Update" | "Delete">("Update");
-  const [isDisabled, setIsDisabled] = useState<true | false>(false);
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [showLoader, setShowLoader] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -100,147 +88,8 @@ const CardDetails: React.FC = () => {
       setIsDisabled(false);
     }
   };
-  
-  let agent: Agent =
-    {
-      agentId: "",
-      complexName: "",
-      contractId: "",
-      name: "",
-      surname: "",
-      id: "",
-      cellNum: "",
-      street1: "",
-      street2: "",
-      city: "",
-      province: "",
-      postalCode: "",
-      password: "",
-    }
-
-  let complex: Complex =
-    {
-      complexId: "",
-      complexName: "",
-      street1: "",
-      street2: "",
-      city: "",
-      province: "",
-      postalCode: "",
-      telephoneNum: "",
-      startTime: new Date,
-      endTime: new Date,
-      cellNum: "",
-      units: [],
-      agents: [],
-    }
-  let pack: Pack =
-    {
-      packageId: "",
-      promotionId: "",
-      packageName: "",
-      minutes: 0,
-      standardPrice: "",
-      suvPrice: "",
-      description: "",
-      onPromotion: true,
-    }
-  let promotion: Promotion =
-    {
-      promotionId: "",
-      promotionName: "",
-      packageName: "",
-      standardPrice: "",
-      suvPrice: "",
-      isEnabled: false,
-    }
-
-  const getAgent = () => {
-    var url = "agent/get/".concat(id);
-    Connection.processGetRequest({}, url, (response: any) => {
-      mapAgent(response);
-    });
-  };
-  const getComplex = () => {
-    var url = "complex/get/".concat(id);
-    Connection.processGetRequest({}, url, (response: any) => {
-      mapComplex(response);
-    });
-  };
-  const getPackage = () => {
-    var url = "package/get/".concat(id);
-
-    Connection.processGetRequest({}, url, (response: any) => {
-      mapPackage(response);
-    });
-  };
-  const getPromotion = () => {
-    var url = "promotion/get/".concat(id);
-    Connection.processGetRequest({}, url, (response: any) => {
-      mapPromotion(response);
-    });
-  };
-
-  const mapPackage = (response: any) => {
-    if (response.type === "error") {
-      setErrorMessage(response.data);
-      setShowError(true);
-    } else {
-      pack = response.data.data;
-      console.log(pack)
-    }
-  };
-  const mapAgent = (response: any) => {
-    if (response.type === "error") {
-      setErrorMessage(response.data);
-      setShowError(true);
-    } else {
-      agent = response.data.data
-    }
-  };
-
-  const mapComplex = (response: any) => {
-    if (response.type === "error") {
-      setErrorMessage(response.data);
-      setShowError(true);
-    } else {
-      complex = response.data.data;
-      console.log(complex)
-    }
-  };
-  const mapPromotion = (response: any) => {
-    if (response.type === "error") {
-      setErrorMessage(response.data);
-      setShowError(true);
-    } else {
-      promotion = response.data.data;
-      console.log(promotion)
-    }
-  };
 
   const url = "/page/";
-  /*Assign Content from API*/
-  
-  const getResult= () =>{
-    if (type === "agent") {
-      result = agent;
-      return result;
-      
-    } else if (type === "complex") {
-      result = complex;
-      console.log(result)
-      return result;
-      
-    } else if (type === "package") {
-      result = pack;
-      console.log(result)
-      return result;
-    } else {
-      result = promotion;
-      return result
-
-    }
-  }
 
   return (
     <IonPage>
@@ -264,7 +113,7 @@ const CardDetails: React.FC = () => {
           buttonName={selectedSegment}
           type={type}
           isDisabled={isDisabled}
-          content={getResult()}
+          id={id}
         />}
         </>
       </IonContent>

@@ -1,6 +1,5 @@
 import {
   IonButton,
-  IonButtons,
   IonContent,
   IonFooter,
   IonIcon,
@@ -11,14 +10,13 @@ import {
   IonListHeader,
   IonMenu,
   IonMenuToggle,
-  IonNote,
-  IonTitle,
   IonToolbar,
 } from "@ionic/react";
 
 import TGWLogo from "../../components/TGWLogo.png";
 
 import { useLocation } from "react-router-dom";
+import { useHistory } from 'react-router';
 import {
   businessOutline,
   businessSharp,
@@ -28,14 +26,17 @@ import {
   gridSharp,
   home,
   homeOutline,
+  peopleCircle,
+  peopleCircleOutline,
   peopleOutline,
   peopleSharp,
-  personOutline,
-  personSharp,
+  personCircle,
+  personCircleOutline,
   starOutline,
   starSharp,
 } from "ionicons/icons";
 import "./Menu.css";
+import { Storage } from "@capacitor/storage";
 
 interface AppPage {
   url: string;
@@ -91,16 +92,30 @@ const appPages: AppPage[] = [
     mdIcon: starSharp,
   },
   {
+    title: "Client Management",
+    url: "/clients",
+    iosIcon: peopleCircleOutline,
+    mdIcon: peopleCircle,
+  },
+  {
     title: "Profile",
     url: "/profile",
-    iosIcon: personOutline,
-    mdIcon: personSharp,
+    iosIcon: personCircleOutline,
+    mdIcon: personCircle,
   },
 ];
 
 const Menu: React.FC = () => {
   const location = useLocation();
+  const path = useHistory();
 
+  const removeId = async() => {
+    await Storage.remove({ key: 'adminId' });
+  };
+
+  const signOut = () => {
+    removeId();
+  };
   return (
     <IonMenu contentId="main" type="overlay">
       <IonContent>
@@ -114,7 +129,7 @@ const Menu: React.FC = () => {
                   className={
                     location.pathname === appPage.url ? "selected" : ""
                   }
-                  routerLink={appPage.url}
+                  href={appPage.url}
                   routerDirection="none"
                   lines="none"
                   detail={false}
@@ -132,7 +147,7 @@ const Menu: React.FC = () => {
         </IonList>
         <IonFooter>
           <IonToolbar>
-              <IonButton href="/signIn" fill="solid" shape="round" color="primary">Sign Out</IonButton>
+              <IonButton fill="solid" shape="round" color="primary" href="/signIn" onClick={() => signOut()}>Sign Out</IonButton>
           </IonToolbar>
         </IonFooter>
       </IonContent>

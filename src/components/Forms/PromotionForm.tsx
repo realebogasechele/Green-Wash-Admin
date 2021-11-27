@@ -18,16 +18,32 @@ import Connection from "../../mixins/Connection";
 const PromotionForm: React.FC<{
   name: string;
   isDisabled: boolean;
-  content: any;
+  id: string;
 }> = (props) => {
-  var {
-    promotionId,
-    promotionName,
-    packageName,
-    standardPrice,
-    suvPrice,
-    isEnabled,
-  } = props.content;
+  const [promotion, setPromotion] = useState(
+    {
+      promotionId: "",
+      promotionName: "",
+      packageName: "",
+      standardPrice: "",
+      suvPrice: "",
+      isEnabled: false,
+    });
+
+  const getPromotion = () => {
+    var url = "promotion/get/".concat(props.id);
+    Connection.processGetRequest({}, url, (response: any) => {
+      mapPromotion(response);
+    });
+  };
+  const mapPromotion = (response: any) => {
+    if (response.type === "error") {
+      setErrorMessage(response.data);
+      setShowError(true);
+    } else {
+      setPromotion(response.data.data);
+    }
+  };
 
   const [showLoader, setShowLoader] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -35,11 +51,11 @@ const PromotionForm: React.FC<{
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const [enteredPromotionName, setPromotionName] = useState(promotionName);
-  const [enteredPackageName, setPackageName] = useState(packageName);
-  const [enteredStandardPrice, setStandardPriceName] = useState(standardPrice);
-  const [enteredSuvPrice, setSuvPrice] = useState(suvPrice);
-  const [enteredIsEnabled, setIsEnabled] = useState(isEnabled);
+  const [enteredPromotionName, setPromotionName] = useState(promotion.promotionName);
+  const [enteredPackageName, setPackageName] = useState(promotion.packageName);
+  const [enteredStandardPrice, setStandardPriceName] = useState(promotion.standardPrice);
+  const [enteredSuvPrice, setSuvPrice] = useState(promotion.suvPrice);
+  const [enteredIsEnabled, setIsEnabled] = useState(promotion.isEnabled);
 
   const updatePromotionName = (promotionName: any) => {
     setPromotionName(promotionName);
@@ -64,7 +80,7 @@ const PromotionForm: React.FC<{
     if (props.name === "Update") {
       let url = "promotion/update";
       var payload = {
-        promotionId: promotionId,
+        promotionId: promotion.promotionId,
         promotionName: enteredPromotionName,
         packageName: enteredPackageName,
         standardPrice: enteredStandardPrice,
@@ -76,7 +92,7 @@ const PromotionForm: React.FC<{
         mapUpdateResponse(response);
       });
     } else if (props.name === "Delete") {
-      let url = "promotion/remove/".concat(promotionId);
+      let url = "promotion/remove/".concat(promotion.promotionId);
 
       Connection.processDeleteRequest({}, url, (response: any) => {
         mapDeleteResponse(response);
@@ -84,7 +100,7 @@ const PromotionForm: React.FC<{
     } else if (props.name === "Add") {
       let url = "promotion/add";
       var payload = {
-        promotionId: promotionId,
+        promotionId: promotion.promotionId,
         promotionName: enteredPromotionName,
         packageName: enteredPackageName,
         standardPrice: enteredStandardPrice,
@@ -221,7 +237,7 @@ const PromotionForm: React.FC<{
       </IonRow>
       <IonRow>
         <IonCol>
-          <IonButton type="submit" expand="block" onClick={buttonHandler}>
+          <IonButton shape="round" type="submit" expand="block" onClick={buttonHandler}>
             {props.name}
           </IonButton>
         </IonCol>

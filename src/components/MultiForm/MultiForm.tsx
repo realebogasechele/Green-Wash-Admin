@@ -58,7 +58,7 @@ const MultiForm: React.FC<{
   buttonName: string;
   type: "agent" | "complex" | "package" | "promotion";
   isDisabled: boolean;
-  content: any;
+  id: string;
 }> = (props) => {
   let form;
 
@@ -67,7 +67,7 @@ const MultiForm: React.FC<{
       <AgentForm
         name={props.buttonName}
         isDisabled={props.isDisabled}
-        content={props.content}
+        id={props.id}
       />
     );
   } else if (props.type === "complex") {
@@ -75,7 +75,7 @@ const MultiForm: React.FC<{
       <ComplexForm
         name={props.buttonName}
         isDisabled={props.isDisabled}
-        content={props.content}
+        id={props.id}
       />
     );
   } else if (props.type === "package") {
@@ -83,7 +83,7 @@ const MultiForm: React.FC<{
       <PackageForm
         name={props.buttonName}
         isDisabled={props.isDisabled}
-        content={props.content}
+        id={props.id}
       />
     );
   } else {
@@ -91,7 +91,7 @@ const MultiForm: React.FC<{
       <PromotionForm
         name={props.buttonName}
         isDisabled={props.isDisabled}
-        content={props.content}
+        id={props.id}
       />
     );
   }

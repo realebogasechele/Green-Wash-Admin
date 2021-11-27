@@ -41,12 +41,12 @@ const SignUp: React.FC = () => {
         <IonToolbar color="primary">
           <IonTitle>Sign Up</IonTitle>
           <IonButtons slot="start">
-            <IonBackButton defaultHref="/signIn"/>
+            <IonBackButton />
           </IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <AdminForm buttonName="Sign Up" content={admin}/>
+        <AdminForm buttonName="Sign Up" isDisabled={false} content={admin}/>
       </IonContent>
     </IonPage>
   );

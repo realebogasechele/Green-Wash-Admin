@@ -1,86 +1,119 @@
 import {
+  IonAlert,
   IonButton,
   IonCol,
   IonGrid,
   IonInput,
   IonItem,
   IonLabel,
+  IonLoading,
   IonRow,
   IonTextarea,
   IonToggle,
+  useIonViewDidEnter,
 } from "@ionic/react";
 import React, { useState } from "react";
+import { useHistory } from "react-router";
 import Connection from "../../mixins/Connection";
+import { validName } from "../Regex/Regex";
 
 const PackageForm: React.FC<{
   name: string;
   isDisabled: boolean;
-  content: any;
+  id: string;
 }> = (props) => {
-  const {
-    packageId,
-    promotionId,
-    packageName,
-    minutes,
-    standardPrice,
-    suvPrice,
-    description,
-    onPromotion,
-  } = props.content;
 
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showError, setShowError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  useIonViewDidEnter(()=>{
+    if(props.name === 'Update'){
+      setShowLoader(true);
+      getPackage();
+    }
+  });
+
+  const path = useHistory();
+  let valid: boolean = false;
+
+  const [pack, setPack] = useState(
+    {
+      packageId: "",
+      promotionId: "",
+      packageName: "",
+      minutes: 0,
+      standardPrice: "",
+      suvPrice: "",
+      description: "",
+      onPromotion: true,
+    });
+
+    const getPackage = () => {
+      var url = "package/get/".concat(props.id);
+  
+      Connection.processGetRequest({}, url, (response: any) => {
+        mapPackage(response);
+      });
+    };
+
+    const mapPackage = (response: any) => {
+      if (response.type === "error") {
+        setShowLoader(false);
+        setErrorMessage(response.data);
+        setShowError(true);
+      } else {
+        setShowLoader(false);
+        setPack(response.data.data);
+      }
+    };
+
+    const [showLoader, setShowLoader] = useState(false);
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [showSuccess, setShowSuccess] = useState(false);
 
   const updatePackageName = (packageName: any) => {
-    setEnteredPackageName(packageName);
+    pack.packageName = packageName;
   };
   const updateMinutes = (minutes: any) => {
-    setEnteredMinutes(minutes);
+    pack.minutes = minutes;
   };
   const updateStandardPrice = (standardPrice: any) => {
-    setEnteredStandardPrice(standardPrice);
+    pack.standardPrice = standardPrice
   };
   const updateSuvPrice = (suvPrice: any) => {
-    setEnteredSuvPrice(suvPrice);
+   pack.suvPrice = suvPrice;
   };
   const updateDescription = (description: any) => {
-    setEnteredDescription(description);
+    pack.description = description;
   };
   const updateOnPromotion = (onPromotion: any) => {
-    setOnPromotion(onPromotion);
+    pack.onPromotion = onPromotion;
   };
-
-  const [enteredPackageName, setEnteredPackageName] = useState(packageName);
-  const [enteredMinutes, setEnteredMinutes] = useState(minutes);
-  const [enteredStandardPrice, setEnteredStandardPrice] =
-    useState(standardPrice);
-  const [enteredSuvPrice, setEnteredSuvPrice] = useState(suvPrice);
-  const [enteredDescription, setEnteredDescription] = useState(description);
-  const [enteredOnPromotion, setOnPromotion] = useState(onPromotion);
 
   function mapDeleteResponse(response: any) {
     return (console.log("deleted"));
   }
 
   const buttonHandler = () => {
+    validateForm();
+    if(valid === true){
     if (props.name === "Update") {
       var url = "package/update";
-      var pack = {
-        packageId: packageId,
-        promotionId: promotionId,
-        packageName: enteredPackageName,
-        minutes: enteredMinutes,
-        standardPrice: enteredStandardPrice,
-        suvPrice: enteredSuvPrice,
-        onPromotion: onPromotion,
+      var payload = {
+        packageId: pack.packageId,
+        promotionId: pack.promotionId,
+        packageName: pack.packageName,
+        minutes: pack.minutes,
+        standardPrice: pack.standardPrice,
+        description:pack.description,
+        suvPrice: pack.suvPrice,
+        onPromotion: pack.onPromotion,
       };
 
-      Connection.processPostRequest(pack, url, (response: any) => {
+      Connection.processPostRequest(payload, url, (response: any) => {
         mapResponse(response);
       });
     } else if (props.name === "Delete") {
-      url = "package/remove/".concat(packageId);
+      url = "package/remove/".concat(pack.packageId);
 
       Connection.processDeleteRequest({}, url,(response: any)=>{
         mapDeleteResponse(response);
@@ -88,32 +121,93 @@ const PackageForm: React.FC<{
 
     } else {
       url = "package/add";
-      var pack = {
-        packageId: packageId,
-        promotionId: promotionId,
-        packageName: enteredPackageName,
-        minutes: enteredMinutes,
-        standardPrice: enteredStandardPrice,
-        suvPrice: enteredSuvPrice,
-        onPromotion: onPromotion,
+      var payload = {
+        packageId: pack.packageId,
+        promotionId: pack.promotionId,
+        packageName: pack.packageName,
+        minutes: pack.minutes,
+        standardPrice: pack.standardPrice,
+        description:pack.description,
+        suvPrice: pack.suvPrice,
+        onPromotion: pack.onPromotion,
       };
-      console.log(pack);
-      Connection.processPostRequest(pack, url, (response: any) => {
+      Connection.processPostRequest(payload, url, (response: any) => {
         mapResponse(response);
       });
     }
+  }
   };
 
-  const mapResponse = (response: any) => {};
+  const mapResponse = (response: any) => {
+    if(response.data === 'error'){
+      setShowLoader(false);
+      setErrorMessage(response.data.data);
+      setShowError(true);
+    }else{
+      setShowLoader(false);
+      if(props.name === 'Update'){
+        setSuccessMessage('Successfully Updated!');
+        setShowSuccess(true);
+      }else{
+        setSuccessMessage('Successfully Added!');
+        setShowSuccess(true);
+      }
+    }
+  };
+
+  const validateForm = () => {
+    if(pack.packageName === '' || pack.standardPrice === '' || pack.suvPrice === '' || pack.description === ''){
+      setShowLoader(false);
+      setErrorMessage('Fields must not be empty.')
+      setShowError(true);
+    }else if(!validName.test(pack.packageName)){
+      setShowLoader(false);
+      setErrorMessage('Invalid Package Name.')
+      setShowError(true);
+    }else if(pack.minutes <= 0){
+      setShowLoader(false);
+      setErrorMessage('You cannot have 0 minutes.')
+      setShowError(true);
+    }else if(pack.standardPrice <='0'){
+      setShowLoader(false);
+      setErrorMessage('You cannot have a free item')
+      setShowError(true);
+    }else{
+      valid = true;
+    }
+  }
   return (
     <IonGrid>
+      <IonLoading
+        cssClass="my-custom-class"
+        showBackdrop
+        isOpen={showLoader}
+        message={"Please wait..."}
+      />
+
+      <IonAlert
+        isOpen={showError}
+        onDidDismiss={() => setShowError(false)}
+        header={"Error"}
+        subHeader={"Something went wrong."}
+        message={errorMessage}
+        buttons={["OK"]}
+      />
+
+      <IonAlert
+        isOpen={showSuccess}
+        onDidDismiss={() => path.push("/page/Package/package")}
+        header={"Success"}
+        subHeader={successMessage}
+        buttons={["OK"]}
+      />
       <IonRow>
         <IonCol>
           <IonItem>
             <IonLabel position="floating">Package Name</IonLabel>
             <IonInput
               disabled={props.isDisabled}
-              value={enteredPackageName}
+              value={pack.packageName}
               onIonChange={(e) => updatePackageName(e.detail.value)}
             ></IonInput>
           </IonItem>
@@ -125,7 +219,7 @@ const PackageForm: React.FC<{
             <IonLabel position="floating">Minutes</IonLabel>
             <IonInput
               disabled={props.isDisabled}
-              value={enteredMinutes}
+              value={pack.minutes}
               onIonChange={(e) => updateMinutes(e.detail.value)}
             ></IonInput>
           </IonItem>
@@ -137,7 +231,7 @@ const PackageForm: React.FC<{
             <IonLabel position="floating">Standard Price</IonLabel>
             <IonInput
               disabled={props.isDisabled}
-              value={enteredStandardPrice}
+              value={pack.standardPrice}
               onIonChange={(e) => updateStandardPrice(e.detail.value)}
             ></IonInput>
           </IonItem>
@@ -149,7 +243,7 @@ const PackageForm: React.FC<{
             <IonLabel position="floating">SUV Price</IonLabel>
             <IonInput
               disabled={props.isDisabled}
-              value={enteredSuvPrice}
+              value={pack.suvPrice}
               onIonChange={(e) => updateSuvPrice(e.detail.value)}
             ></IonInput>
           </IonItem>
@@ -160,8 +254,9 @@ const PackageForm: React.FC<{
           <IonItem>
             <IonLabel position="floating">Description</IonLabel>
             <IonTextarea
+            spellcheck={true}
               disabled={props.isDisabled}
-              value={enteredDescription}
+              value={pack.description}
               onIonChange={(e) => updateDescription(e.detail.value)}
             />
           </IonItem>
@@ -174,7 +269,7 @@ const PackageForm: React.FC<{
             <IonToggle
               color={"primary"}
               disabled={props.isDisabled}
-              checked={enteredOnPromotion}
+              checked={pack.onPromotion}
               onIonChange={(e) => updateOnPromotion(e.detail.checked)}
             />
           </IonItem>
@@ -182,7 +277,7 @@ const PackageForm: React.FC<{
       </IonRow>
       <IonRow>
         <IonCol>
-          <IonButton type="submit" expand="block" onClick={buttonHandler}>
+          <IonButton shape="round" type="submit" expand="block" onClick={buttonHandler}>
             {props.name}
           </IonButton>
         </IonCol>

@@ -10,12 +10,9 @@ import {
 } from "@ionic/react";
 import React, { useState } from "react";
 import AdminForm from "../../components/Forms/AdminForm";
+import InputControls from "../../components/InputControls/InputControls";
 
 const Profile: React.FC = () => {
-
-  useIonViewWillEnter(()=>{
-  })
-
   interface Admin{
     adminId: string;
     name: string;
@@ -32,23 +29,31 @@ const Profile: React.FC = () => {
     cellNum:"",
     password:"",
   }
-  const [showLoader, setShowLoader] = useState(false);
-  const [showError, setShowError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
+  const [selectedSegment, setSelectedSegment] = useState<"Update" | "Delete">("Update");
+  const selectedSegmentHandler = (selectedValue: "Update" | "Delete") => {
+    setSelectedSegment(selectedValue);
+    if (selectedValue == "Delete") {
+      setIsDisabled(true);
+    } else {
+      setIsDisabled(false);
+    }
+  };
 
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar color="primary">
           <IonButtons slot="start">
-            <IonBackButton defaultHref="/dashboard"/>
+            <IonBackButton />
           </IonButtons>
           <IonTitle>Profile</IonTitle>
         </IonToolbar>
       </IonHeader>
 
       <IonContent >
-        <AdminForm buttonName="Update" content={admin}/>
+      <InputControls selectedValue={selectedSegment} onSelectedValue={selectedSegmentHandler}/>
+        <AdminForm buttonName={selectedSegment} content={admin} isDisabled={isDisabled}/>
       </IonContent>
     </IonPage>
   );

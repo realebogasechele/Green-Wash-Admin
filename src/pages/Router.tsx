@@ -10,7 +10,12 @@ import Profile from "./Profile/Profile";
 import Add from "./Add/Add"
 import CardDetails from "./CardDetails/CardDetails";
 import Management from "./Management/Management";
-import Menu from "../components/Menu/Menu";
+import ForgotPassword from "./ForgotPassword/ForgotPassword";
+import Otp from "./ForgotPassword/Otp";
+import NewPassword from "./ForgotPassword/NewPassword";
+import Clients from "./Clients/Clients";
+import Verify from "./Recover Account/Verify";
+import RecoverOtp from "./Recover Account/RecoverOtp";
 
 const Router: React.FC<RouteComponentProps> = ({ match }) => (
   <IonRouterOutlet id="main">
@@ -40,6 +45,24 @@ const Router: React.FC<RouteComponentProps> = ({ match }) => (
     </Route>
     <Route path="/signUp" exact={true}>
       <SignUp />
+    </Route>
+    <Route path="/clients" exact={true}>
+      <Clients />
+      </Route>
+    <Route path="/forgot" exact={true}>
+      <ForgotPassword />
+    </Route>
+    <Route path="/forgot/otp" exact={true}>
+      <Otp />
+    </Route>
+    <Route path="/newPassword" exact={true}>
+      <NewPassword />
+    </Route>
+    <Route path="/recover" exact={true}>
+      <Verify />
+    </Route>
+    <Route path="/recover/otp" exact={true}>
+      <RecoverOtp />
     </Route>
   </IonRouterOutlet>
 );
