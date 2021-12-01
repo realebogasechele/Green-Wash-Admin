@@ -245,9 +245,11 @@ const Dashboard: React.FC = () => {
         label: "Packages",
         data: packPopularityValues,
         backgroundColor: [
-          "rgb(255, 99, 132)",
-          "rgb(54, 162, 235)",
-          "rgb(255, 205, 86)",
+          "rgb(93,204,90)",
+          "rgb(132,227,151)",
+          "rgb(87,205,90)",
+          "rgb(55,66,65)",
+          "rgb(10,168,76)"
         ],
         hoverOffset: 4,
       },
@@ -261,9 +263,11 @@ const Dashboard: React.FC = () => {
         label: "Clients",
         data: clients,
         backgroundColor: [
-          "rgb(255, 99, 132)",
-          "rgb(54, 162, 235)",
-          "rgb(255, 205, 86)",
+          "rgb(93,204,90)",
+          "rgb(132,227,151)",
+          "rgb(87,205,90)",
+          "rgb(55,66,65)",
+          "rgb(10,168,76)"
         ],
         hoverOffset: 4,
       },
@@ -275,9 +279,11 @@ const Dashboard: React.FC = () => {
       {
         data: typeOfBookings,
         backgroundColor: [
-          "rgb(255, 99, 132)",
-          "rgb(54, 162, 235)",
-          "rgb(255, 205, 86)",
+          "rgb(93,204,90)",
+          "rgb(132,227,151)",
+          "rgb(87,205,90)",
+          "rgb(55,66,65)",
+          "rgb(10,168,76)"
         ],
         hoverOffset: 4,
       },
@@ -289,8 +295,11 @@ const Dashboard: React.FC = () => {
       {
         data: totalEarnings,
         backgroundColor: [
-          "rgb(255, 99, 132)",
-          "rgb(54, 162, 235)",
+          "rgb(93,204,90)",
+          "rgb(132,227,151)",
+          "rgb(87,205,90)",
+          "rgb(55,66,65)",
+          "rgb(10,168,76)"
         ],
         hoverOffset: 4,
       },

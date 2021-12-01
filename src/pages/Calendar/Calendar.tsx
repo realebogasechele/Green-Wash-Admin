@@ -115,8 +115,8 @@ const Calendar: React.FC = () => {
                 complexName={booking.complexName}
                 packageName={booking.packageName}
                 price={booking.price}
-                startTime={booking.startTime}
-                endTime={booking.endTime}
+                startTime={new Date(booking.startTime).toDateString() + " " + new Date(booking.startTime).toLocaleTimeString()}
+                endTime={new Date(booking.endTime).toDateString() + " " + new Date(booking.endTime).toLocaleTimeString()}
               />
             ))}
 

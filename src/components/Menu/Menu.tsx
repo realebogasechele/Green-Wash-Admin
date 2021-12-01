@@ -107,7 +107,7 @@ const appPages: AppPage[] = [
 
 const Menu: React.FC = () => {
   const location = useLocation();
-  const path = useHistory();
+  const history = useHistory();
 
   const removeId = async() => {
     await Storage.remove({ key: 'adminId' });

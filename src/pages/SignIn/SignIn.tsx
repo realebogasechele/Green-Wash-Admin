@@ -22,9 +22,11 @@ import {
   IonTitle,
   IonToast,
   IonToolbar,
+  useIonViewWillEnter,
+  useIonViewWillLeave,
 } from "@ionic/react";
 import React, { useState } from "react";
-import { useHistory } from "react-router";
+import { useHistory, useLocation } from "react-router";
 import TGWLogo from "../../components/TGWLogo.png";
 import Connection from "../../mixins/Connection";
 import {
@@ -36,10 +38,17 @@ import { Storage } from "@capacitor/storage";
 import { App } from "@capacitor/app";
 
 const SignIn: React.FC = () => {
+  useIonViewWillEnter(()=>{
+    App.addListener('backButton', (e) => {
+    if (e.canGoBack === true || e.canGoBack === false){
+      setShowOptions(true)
+    }
+  }
+  )
+  })
   const history = useHistory();
 
   let valid: boolean = false;
-  let load: boolean = false;
 
   const [showLoader, setShowLoader] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -50,10 +59,6 @@ const SignIn: React.FC = () => {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
-  App.addListener('backButton', () => 
-    setShowOptions(true)
-  )
 
   const updateUsername = (cellNum: any) => {
     setUsername(cellNum);
@@ -134,7 +139,9 @@ const SignIn: React.FC = () => {
 
           <IonAlert
             isOpen={showSuccess}
-            onDidDismiss={() => history.replace("/dashboard")}
+            onDidDismiss={() => {
+              history.push("/dashboard");
+            }}
             header={"Success"}
             subHeader={successMessage}
             buttons={["OK"]}
@@ -203,14 +210,14 @@ const SignIn: React.FC = () => {
                 </IonCol>
               </IonRow>
               <IonRow>
-                <IonCol offset="2">
+                <IonCol style={{textAlign: "center"}}>
                   <p>
                     <a href="/forgot">Forgot password ?</a> or <a href="/recover">Recover account ?</a>
                   </p>
                 </IonCol>
               </IonRow>
               <IonRow>
-                <IonCol offset="2.5">
+                <IonCol style={{textAlign: "center"}}>
                   Don't have an account ? <a href="/signUp">Sign Up.</a>
                 </IonCol>
               </IonRow>

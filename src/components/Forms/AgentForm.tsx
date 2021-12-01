@@ -137,10 +137,24 @@ const AgentForm: React.FC<{ name: string; isDisabled: boolean; id: string }> = (
       validateForm();
     } else if (props.name === "Delete") {
       let url = "agent/remove/".concat(agent.agentId);
-      console.log("deleted");
+      Connection.processPostRequest({}, url, (response: any) => {
+        mapDeleteResponse(response);
+      })
     } else {
       setShowLoader(true);
       validateForm();
+    }
+  };
+
+  const mapDeleteResponse = (response: any) => {
+    if(response.type === 'error'){
+      setShowLoader(false);
+      setErrorMessage(response.data);
+      setShowError(true);
+    }else{
+        setShowLoader(false);
+        setSuccessMessage("Agent Removed");
+        setShowSuccess(true);
     }
   };
 
@@ -227,7 +241,6 @@ const AgentForm: React.FC<{ name: string; isDisabled: boolean; id: string }> = (
           );
           setShowError(true);
         } else {
-          console.log("add");
           let url = "agent/add";
           var request = {
             complexName: agent.complexName,

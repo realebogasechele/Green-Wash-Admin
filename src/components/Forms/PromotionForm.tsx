@@ -14,6 +14,7 @@ import {
 import React, { useState } from "react";
 import { useHistory } from "react-router";
 import Connection from "../../mixins/Connection";
+import { validName } from "../Regex/Regex";
 
 const PromotionForm: React.FC<{
   name: string;
@@ -29,6 +30,12 @@ const PromotionForm: React.FC<{
       suvPrice: "",
       isEnabled: false,
     });
+
+    useIonViewWillEnter(()=>{
+      if(props.name === "Update"){
+        getPromotion();
+      }
+    })
 
   const getPromotion = () => {
     var url = "promotion/get/".concat(props.id);
@@ -51,26 +58,20 @@ const PromotionForm: React.FC<{
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const [enteredPromotionName, setPromotionName] = useState(promotion.promotionName);
-  const [enteredPackageName, setPackageName] = useState(promotion.packageName);
-  const [enteredStandardPrice, setStandardPriceName] = useState(promotion.standardPrice);
-  const [enteredSuvPrice, setSuvPrice] = useState(promotion.suvPrice);
-  const [enteredIsEnabled, setIsEnabled] = useState(promotion.isEnabled);
-
   const updatePromotionName = (promotionName: any) => {
-    setPromotionName(promotionName);
+    promotion.promotionName = promotionName;
   };
   const updatePackageName = (packageName: any) => {
-    setPackageName(packageName);
+    promotion.packageName = packageName;
   };
   const updateStandardPrice = (standardPrice: any) => {
-    setStandardPriceName(standardPrice);
+    promotion.standardPrice = standardPrice;
   };
   const updateSuvPrice = (suvPrice: any) => {
-    setSuvPrice(suvPrice);
+    promotion.suvPrice = suvPrice;
   };
   const updateIsEnabled = (isEnabled: any) => {
-    setIsEnabled(isEnabled);
+    promotion.isEnabled = isEnabled;
   };
 
   const path = useHistory();
@@ -78,19 +79,7 @@ const PromotionForm: React.FC<{
   const buttonHandler = () => {
     setShowLoader(true);
     if (props.name === "Update") {
-      let url = "promotion/update";
-      var payload = {
-        promotionId: promotion.promotionId,
-        promotionName: enteredPromotionName,
-        packageName: enteredPackageName,
-        standardPrice: enteredStandardPrice,
-        suvPrice: enteredSuvPrice,
-        isEnabled: enteredIsEnabled
-      };
-
-      Connection.processPostRequest(payload, url, (response: any) => {
-        mapUpdateResponse(response);
-      });
+      validateForm();
     } else if (props.name === "Delete") {
       let url = "promotion/remove/".concat(promotion.promotionId);
 
@@ -98,19 +87,7 @@ const PromotionForm: React.FC<{
         mapDeleteResponse(response);
       });
     } else if (props.name === "Add") {
-      let url = "promotion/add";
-      var payload = {
-        promotionId: promotion.promotionId,
-        promotionName: enteredPromotionName,
-        packageName: enteredPackageName,
-        standardPrice: enteredStandardPrice,
-        suvPrice: enteredSuvPrice,
-        isEnabled: enteredIsEnabled
-      };
-      console.log(payload);
-      Connection.processPostRequest(payload, url, (response: any) => {
-        mapAddResponse(response);
-      });
+      validateForm();
     }
   };
 
@@ -150,6 +127,53 @@ const PromotionForm: React.FC<{
     }
   };
 
+  const validateForm = () => {
+    if(promotion.promotionName === "" ||
+    promotion.packageName === "" ||
+    promotion.standardPrice === "" ||
+    promotion.suvPrice === ""){
+      setShowLoader(false);
+      setErrorMessage("Fields must not be empty.");
+      setShowError(true);
+    }else if (!validName.test(promotion.promotionName)){
+      setShowLoader(false);
+      setErrorMessage("Invalid Promotion Name.")
+      setShowError(true);
+    }else if(!validName.test(promotion.packageName)){
+      setShowLoader(false);
+      setErrorMessage("Invalid Package Name.");
+      setShowError(true);
+    }else{
+      if(props.name === "Update"){
+        let url = "promotion/update";
+      var payload = {
+        promotionId: promotion.promotionId,
+        promotionName: promotion.promotionName,
+        packageName: promotion.packageName,
+        standardPrice: promotion.standardPrice,
+        suvPrice: promotion.suvPrice,
+        isEnabled: promotion.isEnabled
+      };
+
+      Connection.processPostRequest(payload, url, (response: any) => {
+        mapUpdateResponse(response);
+      });
+      }else{
+        let url = "promotion/add";
+        var add = {
+        promotionName: promotion.promotionName,
+        packageName: promotion.packageName,
+        standardPrice: promotion.standardPrice,
+        suvPrice: promotion.suvPrice,
+        isEnabled: promotion.isEnabled
+      };
+      Connection.processPostRequest(add, url, (response: any) => {
+        mapAddResponse(response);
+      });
+      }
+    }
+  };
+
   return (
     <IonGrid>
       <IonLoading
@@ -181,7 +205,7 @@ const PromotionForm: React.FC<{
             <IonLabel position="floating">Promotion Name</IonLabel>
             <IonInput
               disabled={props.isDisabled}
-              value={enteredPromotionName}
+              value={promotion.promotionName}
               onIonChange={(e) => updatePromotionName(e.detail.value)}
             ></IonInput>
           </IonItem>
@@ -193,7 +217,7 @@ const PromotionForm: React.FC<{
             <IonLabel position="floating">Package Name</IonLabel>
             <IonInput
               disabled={props.isDisabled}
-              value={enteredPackageName}
+              value={promotion.packageName}
               onIonChange={(e) => updatePackageName(e.detail.value)}
             ></IonInput>
           </IonItem>
@@ -205,7 +229,7 @@ const PromotionForm: React.FC<{
             <IonLabel position="floating">Standard Price</IonLabel>
             <IonInput
               disabled={props.isDisabled}
-              value={enteredStandardPrice}
+              value={promotion.standardPrice}
               onIonChange={(e) => updateStandardPrice(e.detail.value)}
             ></IonInput>
           </IonItem>
@@ -217,7 +241,7 @@ const PromotionForm: React.FC<{
             <IonLabel position="floating">Suv Price</IonLabel>
             <IonInput
               disabled={props.isDisabled}
-              value={enteredSuvPrice}
+              value={promotion.suvPrice}
               onIonChange={(e) => updateSuvPrice(e.detail.value)}
             ></IonInput>
           </IonItem>
@@ -228,7 +252,7 @@ const PromotionForm: React.FC<{
           <IonItem>
             <IonLabel>Enabled</IonLabel>
             <IonToggle
-              checked={enteredIsEnabled}
+              checked={promotion.isEnabled}
               disabled={props.isDisabled}
               onIonChange={(e) => updateIsEnabled(e.detail.value)}
             />
